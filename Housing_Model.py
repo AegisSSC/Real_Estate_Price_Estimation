@@ -1,3 +1,9 @@
+# To Do list:
+# Build a Visualizer 
+# Build a Scraper to read in data
+# Properly Segment and Generalize the Code
+# Add SQL/Database Support
+
 import pandas as pd
 housing = pd.read_csv("housing.csv")
 housing.head()
@@ -9,35 +15,43 @@ plt.show()
 
 #Split the data set into a training set and a testing set. The Test Set will be roughly 20% of the 
 from sklearn.model_selection import train_test_split
-train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
+def SplitToTraining(data_set, size):
+    return train_test_split(data_set, test_size=size, random_state=42)
 
 
 #Divide the information into a bar graph to represent "Bins" of data to better represent the data
 import numpy as np
-housing['income_cat'] = pd.cut(housing['median_income'], bins=[0., 1.5, 3.0, 4.5, 6., np.inf], labels=[1, 2, 3, 4, 5])
-housing['income_cat'].hist()
-plt.show()
+def DivideToBins(housing):
+    housing['income_cat'] = pd.cut(housing['median_income'], bins=[0., 1.5, 3.0, 4.5, 6., np.inf], labels=[1, 2, 3, 4, 5])
+    housing['income_cat'].hist()
+    plt.show()
 
 
 #Now that you've seen that the data set is stratified, it is important to stratify the information. 
 # In this case, we stratify based on the income category  
 from sklearn.model_selection import StratifiedShuffleSplit
-split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
-for train_index, test_index in split.split(housing, housing["income_cat"]):
-    strat_train_set = housing.loc[train_index]
-    strat_test_set = housing.loc[test_index]
-print(strat_test_set['income_cat'].value_counts() / len(strat_test_set))
+def StratifyData(housing):
+    split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+    for train_index, test_index in split.split(housing, housing["income_cat"]):
+        strat_train_set = housing.loc[train_index]
+        strat_test_set = housing.loc[test_index]
+    print(strat_test_set['income_cat'].value_counts() / len(strat_test_set))
 
-#Now you can remove the income category added for stratification to get the data back to its original form
-for set_ in (strat_train_set, strat_test_set):
-    set_.drop('income_cat', axis=1, inplace=True)
-housing = strat_train_set.copy()
+    #Now you can remove the income category added for stratification to get the data back to its original form
+    for set_ in (strat_train_set, strat_test_set):
+        set_.drop('income_cat', axis=1, inplace=True)
+    housing = strat_train_set.copy()
 
+    
+
+#HeatMap of housing data. 
 #Plot the data set as a scatter plot to visualize the data. 
-housing.plot(kind='scatter', x='longitude', y='latitude', alpha=0.4, s=housing['population']/100, label='population',
-figsize=(12, 8), c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
-plt.legend()
-plt.show()
+def heatmap(housing):
+    housing.plot(kind='scatter', x='longitude', y='latitude', alpha=0.4, s=housing['population']/100, label='population',
+    figsize=(12, 8), c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
+    plt.legend()
+    plt.show()
+
 
 #use the corr() to find the correlation coefficent between each of the attributes. 
 corr_matrix = housing.corr()
